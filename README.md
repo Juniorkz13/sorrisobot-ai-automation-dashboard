@@ -39,10 +39,16 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 ├── supabase/
 │   ├── migrations/
 │   └── seed/
+├── infra/
+│   └── evolution-api/
+│       ├── docker-compose.yml
+│       ├── .env.example
+│       └── scripts/
 ├── docs/
 │   ├── architecture.md
 │   ├── database-schema.md
 │   ├── delivery-checklist.md
+│   ├── evolution-api-setup.md
 │   ├── setup-tools.md
 │   ├── vibe-coding-journal.md
 │   └── video-script.md
@@ -60,10 +66,17 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 
 - `docs/architecture.md`: visão geral da arquitetura, fluxos principais e decisões técnicas iniciais.
 - `docs/database-schema.md`: modelagem inicial do Supabase, tabelas, relações, RLS, realtime e views de métricas.
+- `docs/evolution-api-setup.md`: preparação da Evolution API v2 com Docker Compose, Postgres interno, Redis interno e scripts auxiliares.
 - `docs/setup-tools.md`: preparação das ferramentas, contas necessárias, variáveis sensíveis e decisões da etapa.
 - `docs/delivery-checklist.md`: checklist de entregáveis obrigatórios e diferenciais planejados.
 - `docs/vibe-coding-journal.md`: registro do uso de IA durante o desenvolvimento.
 - `docs/video-script.md`: roteiro inicial dos vídeos de demonstração.
+
+## Evolution API
+
+A Evolution API v2 será executada em Docker Compose com PostgreSQL e Redis próprios, isolados do Supabase do produto. O Supabase continuará sendo usado apenas para dados de negócio, memória, histórico, métricas e realtime do SorrisoBot AI.
+
+A configuração inicial está em `infra/evolution-api` e o passo a passo está documentado em `docs/evolution-api-setup.md`.
 
 ## Diferenciais que serão implementados
 

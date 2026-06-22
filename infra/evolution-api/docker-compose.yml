@@ -1,0 +1,76 @@
+name: sorrisobot-evolution-api
+
+services:
+  evolution-api:
+    # Verifique a tag recomendada na documentacao da Evolution API v2 antes do deploy final.
+    # Evite usar "latest" em ambiente de demonstracao ou producao.
+    image: ${EVOLUTION_API_IMAGE:-evoapicloud/evolution-api:v2.3.7}
+    container_name: sorrisobot_evolution_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${EVOLUTION_API_PORT:-8080}:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_URL: ${SERVER_URL:-http://localhost:8080}
+      AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY}
+      DATABASE_PROVIDER: ${DATABASE_PROVIDER:-postgresql}
+      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
+      CACHE_REDIS_ENABLED: ${CACHE_REDIS_ENABLED:-true}
+      CACHE_REDIS_URI: ${CACHE_REDIS_URI}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Algumas variaveis podem mudar conforme a versao da Evolution API.
+      # Confira a documentacao oficial da versao usada antes do deploy final.
+      # Exemplo de configuracoes comuns:
+      # CACHE_LOCAL_ENABLED: "false"
+      # CONFIG_SESSION_PHONE_CLIENT: "SorrisoBot AI"
+      # QRCODE_LIMIT: "30"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sorrisobot_evolution_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evolution}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-evolution}
+    volumes:
+      - evolution_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-evolution} -d ${POSTGRES_DB:-evolution}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sorrisobot_evolution_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - evolution_redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  evolution_instances:
+  evolution_postgres_data:
+  evolution_redis_data:

@@ -47,3 +47,13 @@ Este documento registra o uso de IA durante o desenvolvimento do SorrisoBot AI. 
 - Onde a IA falhou: ainda não avaliado
 - Correções manuais feitas: validação da migration no SQL Editor do Supabase e remoção dos dados temporários de teste
 - Decisão técnica tomada: usar Supabase como fonte única da verdade para histórico, memória, métricas e realtime
+
+## 2026-06-22 — Preparação da infraestrutura Evolution API
+
+- Ferramenta usada: Codex
+- Prompt utilizado: criação de infraestrutura Docker Compose e scripts para Evolution API
+- Resultado obtido: estrutura inicial da Evolution API, scripts auxiliares e documentação de setup
+- Onde a IA acertou: separar banco interno da Evolution API do Supabase do produto
+- Onde a IA falhou: ainda não avaliado
+- Correções manuais feitas: validar endpoints conforme versão da Evolution API usada
+- Decisão técnica tomada: usar Evolution API v2 com Docker Compose e instância controlada chamada sorrisobot
