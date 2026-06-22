@@ -41,6 +41,7 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 │   └── seed/
 ├── docs/
 │   ├── architecture.md
+│   ├── database-schema.md
 │   ├── delivery-checklist.md
 │   ├── setup-tools.md
 │   ├── vibe-coding-journal.md
@@ -58,6 +59,7 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 ## Documentação
 
 - `docs/architecture.md`: visão geral da arquitetura, fluxos principais e decisões técnicas iniciais.
+- `docs/database-schema.md`: modelagem inicial do Supabase, tabelas, relações, RLS, realtime e views de métricas.
 - `docs/setup-tools.md`: preparação das ferramentas, contas necessárias, variáveis sensíveis e decisões da etapa.
 - `docs/delivery-checklist.md`: checklist de entregáveis obrigatórios e diferenciais planejados.
 - `docs/vibe-coding-journal.md`: registro do uso de IA durante o desenvolvimento.
@@ -113,3 +115,9 @@ Credenciais, tokens, chaves de API, URLs privadas, senhas e arquivos `.env` não
 Este projeto utilizará um registro contínuo do processo de desenvolvimento com IA. O objetivo é documentar prompts usados, decisões técnicas, resultados obtidos, acertos da IA, falhas encontradas e correções manuais realizadas.
 
 O diário principal está disponível em `docs/vibe-coding-journal.md`.
+
+### Banco de dados
+
+O schema inicial do Supabase está documentado em `docs/database-schema.md` e versionado em `supabase/migrations/202606220001_initial_schema.sql`.
+
+O banco foi modelado para armazenar contatos, conversas, mensagens, eventos, fila de processamento, agendamentos, base de conhecimento, configurações do agente e views de métricas para o dashboard.

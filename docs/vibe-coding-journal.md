@@ -37,3 +37,13 @@ Este documento registra o uso de IA durante o desenvolvimento do SorrisoBot AI. 
 - Onde a IA falhou: ainda não avaliado
 - Correções manuais feitas: revisão para garantir que nenhuma chave real foi versionada
 - Decisão técnica tomada: usar Supabase como banco central e preparar n8n/Evolution API para integração real nas próximas etapas
+
+## 2026-06-22 — Modelagem inicial do banco Supabase
+
+- Ferramenta usada: Codex
+- Prompt utilizado: criação da migration inicial do schema Supabase
+- Resultado obtido: criação das tabelas principais do agente, mensagens, conversas, fila, agendamentos, base de conhecimento, configurações e views de métricas
+- Onde a IA acertou: estruturou o banco pensando no agente e no dashboard desde o início
+- Onde a IA falhou: ainda não avaliado
+- Correções manuais feitas: validação da migration no SQL Editor do Supabase e remoção dos dados temporários de teste
+- Decisão técnica tomada: usar Supabase como fonte única da verdade para histórico, memória, métricas e realtime
