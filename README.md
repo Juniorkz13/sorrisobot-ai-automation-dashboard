@@ -42,6 +42,7 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 ├── docs/
 │   ├── architecture.md
 │   ├── delivery-checklist.md
+│   ├── setup-tools.md
 │   ├── vibe-coding-journal.md
 │   └── video-script.md
 ├── prompts/
@@ -53,6 +54,14 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 ├── LICENSE
 └── README.md
 ```
+
+## Documentação
+
+- `docs/architecture.md`: visão geral da arquitetura, fluxos principais e decisões técnicas iniciais.
+- `docs/setup-tools.md`: preparação das ferramentas, contas necessárias, variáveis sensíveis e decisões da etapa.
+- `docs/delivery-checklist.md`: checklist de entregáveis obrigatórios e diferenciais planejados.
+- `docs/vibe-coding-journal.md`: registro do uso de IA durante o desenvolvimento.
+- `docs/video-script.md`: roteiro inicial dos vídeos de demonstração.
 
 ## Diferenciais que serão implementados
 
