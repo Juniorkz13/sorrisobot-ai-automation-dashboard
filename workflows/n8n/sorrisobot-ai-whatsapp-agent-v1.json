@@ -71,7 +71,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}                                                           ",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -141,7 +141,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -180,7 +180,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -219,7 +219,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -264,14 +264,14 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"system_instruction\": {\n    \"parts\": [\n      {\n        \"text\": \"Você é o SorrisoBot AI, agente de atendimento da Clínica Sorriso Vivo. Responda em português brasileiro, com tom profissional, acolhedor e objetivo. Ajude com dúvidas, orçamento inicial, agendamento e emergências odontológicas. Não invente preços finais nem diagnósticos. Se o usuário pedir atendimento humano, diga que vai encaminhar para a equipe. Para agendamento, peça nome completo, melhor dia, melhor horário e motivo da consulta.\"\n      }\n    ]\n  },\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Mensagem do paciente: {{ $('Normalize Evolution Payload').first().json.text }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "jsonBody": "={{ JSON.stringify($json.geminiRequestBody) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2032,
-        -80
+        1296,
+        128
       ],
       "id": "9b2b9533-6924-4e04-bcb5-d162c1ba648d",
       "name": "Gemini - Generate Response",
@@ -286,7 +286,7 @@
       "typeVersion": 2,
       "position": [
         704,
-        128
+        368
       ],
       "id": "b2931a1c-2723-4dba-ae6f-250b31b3e342",
       "name": "Extract Gemini Response"
@@ -336,33 +336,43 @@
             },
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ EVOLUTION_API_KEY }}"
             }
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.number }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         1168,
-        128
+        368
       ],
       "id": "25774c2b-28e6-4b00-9693-d92e1819a164",
       "name": "Evolution API - Send WhatsApp Message"
     },
     {
       "parameters": {
-        "jsCode": "const normalized = $('Normalize Evolution Payload').first().json;\nconst ai = $('Extract Gemini Response').first().json;\n\nreturn [\n  {\n    json: {\n      number: normalized.phoneRaw,\n      text: ai.responseText,\n      linkPreview: false\n    }\n  }\n];"
+        "jsCode": "const currentItem = $input.first().json;\n\n// Dados originais da mensagem inbound\nconst intentItem = $('Detect Intent and Routing').first().json;\n\n// Resposta extraída do Gemini\nconst responseText =\n  currentItem.responseText ||\n  currentItem.geminiResponse ||\n  currentItem.text ||\n  currentItem.content ||\n  currentItem.answer ||\n  '';\n\nif (!responseText) {\n  throw new Error('Resposta do Gemini não encontrada para enviar no WhatsApp.');\n}\n\nconst rawPhone =\n  intentItem.phone ||\n  intentItem.remoteJid ||\n  intentItem.from ||\n  intentItem.sender ||\n  intentItem.contact_phone ||\n  intentItem.raw_payload?.data?.key?.remoteJid ||\n  intentItem.raw_payload?.key?.remoteJid ||\n  '';\n\nconst number = String(rawPhone)\n  .replace('@s.whatsapp.net', '')\n  .replace(/\\D/g, '');\n\nif (!number) {\n  throw new Error('Número do WhatsApp não encontrado no payload original.');\n}\n\nreturn [\n  {\n    json: {\n      ...currentItem,\n      conversation_id: currentItem.conversation_id || currentItem.id || intentItem.conversation_id,\n      contact_id: currentItem.contact_id || intentItem.contact_id,\n      number,\n      text: responseText,\n      whatsappBody: {\n        number,\n        text: responseText\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        128
+        944,
+        368
       ],
       "id": "23ffc1d3-f9a5-4da0-ac02-123be82da553",
       "name": "Prepare WhatsApp Message Body"
@@ -375,7 +385,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        128
+        368
       ],
       "id": "00db6c03-5618-4697-9b3c-b1a5f12a0eec",
       "name": "Prepare Outbound Message Body"
@@ -387,8 +397,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1824,
-        128
+        1792,
+        368
       ],
       "id": "2277a567-77b5-49dc-a249-8ea72b23638a",
       "name": "Prepare Conversation Event Body"
@@ -402,7 +412,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -426,8 +436,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2048,
-        128
+        2016,
+        368
       ],
       "id": "4ca4bdf6-cae3-44c4-b7e7-9965f8c4587c",
       "name": "Supabase - Save Conversation Event"
@@ -507,7 +517,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -531,8 +541,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1584,
-        128
+        1568,
+        368
       ],
       "id": "3606fcf4-b320-4aa6-8f18-8db8933a06d8",
       "name": "Save Outbound Message"
@@ -607,8 +617,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2032,
-        -240
+        1920,
+        -224
       ],
       "id": "cc628f39-167a-4556-8e07-8fae90622e3c",
       "name": "Prepare Handoff WhatsApp Message Body"
@@ -626,7 +636,7 @@
             },
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ EVOLUTION_API_KEY }}"
             }
           ]
         },
@@ -638,8 +648,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2256,
-        -240
+        2144,
+        -224
       ],
       "id": "9caa8d9a-886d-4aad-8a01-0e5403ecb1ed",
       "name": "Evolution API - Send Handoff Message"
@@ -653,7 +663,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -677,8 +687,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2480,
-        -240
+        2368,
+        -224
       ],
       "id": "4dde63c5-ff63-42bd-93e1-16da4d3ca187",
       "name": "Save Outbound Handoff Message"
@@ -692,7 +702,7 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "{{ API_KEY_PLACEHOLDER }}"
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Authorization",
@@ -716,11 +726,67 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2688,
-        -240
+        2576,
+        -224
       ],
       "id": "309cdb1f-a28b-478b-8aae-db9126e0701a",
       "name": "Save Handoff Event"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "messages",
+        "limit": 10,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "conversation_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -48
+      ],
+      "id": "ef59de1d-4ece-45e1-b1d1-8d9a999b655d",
+      "name": "Get Recent Conversation Messages",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gUnVoLjy8kWCN6zE",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const recentMessages = $input.all().map(item => item.json);\n\n// Conversa atual vinda do Update Conversation State\nconst conversation = $('Update Conversation State').first().json;\n\n// Dados do intent da execução atual\nconst intentData = $('Detect Intent and Routing').first().json;\n\nconst memorySummary =\n  conversation.memory_summary ||\n  'Ainda não há resumo consolidado desta conversa.';\n\nfunction getDateValue(msg) {\n  const value = msg.created_at || msg.createdAt || msg.timestamp || '';\n  const date = new Date(value);\n  return Number.isNaN(date.getTime()) ? 0 : date.getTime();\n}\n\n// Ordena histórico do mais antigo para o mais novo\nconst orderedRecentMessages = recentMessages\n  .slice()\n  .sort((a, b) => getDateValue(a) - getDateValue(b));\n\n// Busca a mensagem inbound mais recente.\n// Essa deve ser a mensagem atual do paciente.\nconst latestInboundMessage = recentMessages\n  .slice()\n  .sort((a, b) => getDateValue(b) - getDateValue(a))\n  .find(msg => msg.direction === 'inbound' && msg.content);\n\nconst currentMessage =\n  latestInboundMessage?.content ||\n  intentData.content ||\n  intentData.messageText ||\n  intentData.text ||\n  '';\n\nif (!currentMessage) {\n  throw new Error('Mensagem atual do paciente não encontrada.');\n}\n\nconst orderedMessages = orderedRecentMessages\n  .map(msg => {\n    const role = msg.direction === 'inbound' ? 'Paciente' : 'SorrisoBot';\n    return `${role}: ${msg.content || ''}`;\n  })\n  .join('\\n');\n\nconst clinicContext = `\nVocê é o SorrisoBot AI, assistente virtual da Clínica Sorriso Vivo, uma clínica odontológica fictícia.\n\nRegras:\n- Responda sempre em português do Brasil.\n- Seja simpático, objetivo e profissional.\n- Não reinicie a conversa se já houver histórico.\n- Não cumprimente novamente se o paciente já foi cumprimentado.\n- Use a mensagem atual do paciente como prioridade.\n- Use o histórico apenas como contexto.\n- Não invente preços exatos.\n- Não confirme agendamentos reais sem integração de agenda.\n- Quando o paciente quiser agendar, colete as informações faltantes: nome completo, procedimento desejado, melhor dia e melhor horário.\n- Se o paciente já informou procedimento ou data, não peça de novo. Peça apenas o que ainda falta.\n- Nunca mencione n8n, Supabase, Evolution API, Gemini, banco de dados ou detalhes internos.\n`;\n\nconst intentInstructions = {\n  appointment_request:\n    'O paciente quer agendar uma consulta. Se ele já informou o procedimento ou data, aproveite essa informação e peça apenas o que falta, como nome completo e horário preferido.',\n  reschedule_request:\n    'O paciente quer remarcar uma consulta. Peça nome, data atual da consulta e novo melhor horário.',\n  cancel_request:\n    'O paciente quer cancelar uma consulta. Peça nome e data/horário da consulta.',\n  price_question:\n    'O paciente perguntou sobre valores. Explique que valores dependem de avaliação e ofereça agendamento.',\n  clinic_hours:\n    'O paciente perguntou sobre horários de atendimento. Responda diretamente e ofereça ajuda para agendar.',\n  location_question:\n    'O paciente perguntou sobre localização. Responda com orientação geral e ofereça ajuda.',\n  procedure_question:\n    'O paciente perguntou sobre procedimento odontológico. Explique de forma simples e recomende avaliação.',\n  greeting:\n    'O paciente enviou uma saudação. Cumprimente apenas se ainda não houver histórico de conversa.',\n  thanks:\n    'O paciente agradeceu. Responda de forma breve e cordial.',\n  unknown:\n    'A intenção não está clara. Use o histórico para entender a continuidade e faça uma pergunta curta se necessário.'\n};\n\nconst intent =\n  conversation.current_intent ||\n  intentData.intent ||\n  'unknown';\n\nconst prompt = `\n${clinicContext}\n\nResumo salvo da conversa:\n${memorySummary}\n\nHistórico recente da conversa:\n${orderedMessages || 'Sem histórico recente disponível.'}\n\nIntent atual:\n${intent}\n\nStatus atual da conversa:\n${conversation.status || 'active'}\n\nMensagem atual do paciente:\n\"${currentMessage}\"\n\nInstrução específica:\n${intentInstructions[intent] || intentInstructions.unknown}\n\nTarefa:\nResponda à mensagem atual do paciente considerando o histórico. Não reinicie a conversa. Não envie nova saudação se o paciente já foi cumprimentado.\n\nResponda apenas com a mensagem final que será enviada no WhatsApp.\n`;\n\nreturn [\n  {\n    json: {\n      ...conversation,\n      conversation_id: conversation.id,\n      contact_id: conversation.contact_id,\n      intent,\n      currentMessage,\n      recentMessages: orderedRecentMessages,\n      geminiPrompt: prompt\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        -48
+      ],
+      "id": "75092cd6-3587-49a3-97d5-b692e62e1124",
+      "name": "Build Gemini Prompt With Memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nif (!item.geminiPrompt) {\n  throw new Error('geminiPrompt não encontrado. Verifique o node Build Gemini Prompt With Memory.');\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      geminiRequestBody: {\n        contents: [\n          {\n            parts: [\n              {\n                text: item.geminiPrompt\n              }\n            ]\n          }\n        ]\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        -48
+      ],
+      "id": "1fb61c8a-f035-4f32-9c05-bcd5ea9ddd08",
+      "name": "Prepare Gemini Request Body"
     }
   ],
   "pinData": {},
@@ -906,7 +972,7 @@
         ],
         [
           {
-            "node": "Gemini - Generate Response",
+            "node": "Get Recent Conversation Messages",
             "type": "main",
             "index": 0
           }
@@ -945,15 +1011,48 @@
           }
         ]
       ]
+    },
+    "Get Recent Conversation Messages": {
+      "main": [
+        [
+          {
+            "node": "Build Gemini Prompt With Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Gemini Prompt With Memory": {
+      "main": [
+        [
+          {
+            "node": "Prepare Gemini Request Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Gemini Request Body": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Generate Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "379f08b1-5892-4916-b9c6-f1cb2244e082",
+  "versionId": "506abffa-fe97-467e-8c18-476953f64554",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0da84756067633c71674ee397b723af08fce198f78dbdd0704eef0e880da3dc9"
