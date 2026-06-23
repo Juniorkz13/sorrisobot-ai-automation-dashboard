@@ -1,0 +1,632 @@
+{
+  "name": "SorrisoBot AI - WhatsApp Agent v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution/sorrisobot/inbound",
+        "options": {
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b9cfac8f-fb7b-4e3a-8625-7ba794e28636",
+      "name": "Webhook",
+      "webhookId": "8846d960-2673-4110-b50c-ac1d8f20e0de"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\n\nconst event = body.event ?? body.type ?? null;\nconst instance = body.instance ?? body.instanceName ?? 'sorrisobot';\nconst data = body.data ?? body;\n\nconst key = data.key ?? {};\nconst message = data.message ?? {};\nconst pushName = data.pushName ?? data.pushname ?? data.senderName ?? null;\n\nconst fromMe = Boolean(key.fromMe);\nconst remoteJid = key.remoteJid ?? data.remoteJid ?? data.from ?? null;\nconst providerMessageId = key.id ?? data.id ?? data.messageId ?? null;\n\nconst text =\n  message?.conversation ??\n  message?.extendedTextMessage?.text ??\n  data?.text ??\n  data?.message?.text ??\n  '';\n\nconst phoneRaw = String(remoteJid ?? '')\n  .replace('@s.whatsapp.net', '')\n  .replace('@c.us', '')\n  .replace(/\\D/g, '');\n\nconst phoneE164 = phoneRaw ? `+${phoneRaw}` : null;\n\nlet messageType = 'unknown';\n\nif (text) {\n  messageType = 'text';\n} else if (message?.imageMessage) {\n  messageType = 'image';\n} else if (message?.audioMessage) {\n  messageType = 'audio';\n} else if (message?.documentMessage) {\n  messageType = 'document';\n} else if (message?.videoMessage) {\n  messageType = 'video';\n} else if (message?.stickerMessage) {\n  messageType = 'sticker';\n}\n\nreturn [\n  {\n    json: {\n      event,\n      instance,\n      fromMe,\n      remoteJid,\n      phoneRaw,\n      phoneE164,\n      pushName,\n      providerMessageId,\n      messageType,\n      text,\n      rawPayload: body,\n      receivedAt: new Date().toISOString(),\n      isInbound: !fromMe,\n      isText: messageType === 'text',\n      shouldProcess: !fromMe && messageType === 'text' && Boolean(text)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2424708f-062a-4e90-8b08-4dd5d2dd2575",
+      "name": "Normalize Evolution Payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "080f45c0-4d2b-479c-a6b0-a805f4e5f656",
+              "leftValue": "={{ $json.shouldProcess }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "49c6c97b-2dd7-4a6c-bef8-2a3f9261b589",
+      "name": "Is Valid Inbound Text Message?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}                                                          ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        -208
+      ],
+      "id": "bc62cfa1-890c-4d7f-b9df-74094c80b2eb",
+      "name": "Gemini"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        -208
+      ],
+      "id": "ec03af4c-aa57-4c9b-b4be-a008d35169a7",
+      "name": "Supabase",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nc2K9aR9R6sicYhr",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "on_conflict",
+              "value": "phone_e164"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone_e164\": \"{{ $json.phoneE164 }}\",\n  \"whatsapp_jid\": \"{{ $json.remoteJid }}\",\n  \"push_name\": \"{{ $json.pushName }}\",\n  \"last_seen_at\": \"{{ $json.receivedAt }}\",\n  \"metadata\": {\n    \"source\": \"evolution_api\",\n    \"instance\": \"{{ $json.instance }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        704,
+        -96
+      ],
+      "id": "ddb09473-5e22-42be-b0d2-56155f3a9af6",
+      "name": "Supabase - Upsert Contact"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}/rest/v1/rpc/get_or_create_open_conversation",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"p_contact_id\": \"{{ $json.id }}\",\n  \"p_instance\": \"{{ $('Normalize Evolution Payload').item.json.instance }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        -96
+      ],
+      "id": "c9b02a37-61a4-4c2f-9ef4-f2130b82bcfc",
+      "name": "Supabase - Get Or Create Conversation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}/rest/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"conversation_id\": \"{{ $('Supabase - Get Or Create Conversation').first().json.id }}\",\n  \"contact_id\": \"{{ $('Supabase - Upsert Contact').first().json.id }}\",\n  \"direction\": \"inbound\",\n  \"type\": \"text\",\n  \"intent\": \"desconhecida\",\n  \"sentiment\": \"neutro\",\n  \"provider\": \"evolution_api\",\n  \"provider_message_id\": \"{{ $('Normalize Evolution Payload').first().json.providerMessageId }}\",\n  \"content\": \"{{ $('Normalize Evolution Payload').first().json.text }}\",\n  \"raw_payload\": {{ JSON.stringify($('Normalize Evolution Payload').first().json.rawPayload) }},\n  \"metadata\": {\n    \"instance\": \"{{ $('Normalize Evolution Payload').first().json.instance }}\",\n    \"remote_jid\": \"{{ $('Normalize Evolution Payload').first().json.remoteJid }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "9fbe3894-bbda-4a8c-9461-b9e63d1c1745",
+      "name": "Supabase - Save Inbound Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"system_instruction\": {\n    \"parts\": [\n      {\n        \"text\": \"Você é o SorrisoBot AI, agente de atendimento da Clínica Sorriso Vivo. Responda em português brasileiro, com tom profissional, acolhedor e objetivo. Ajude com dúvidas, orçamento inicial, agendamento e emergências odontológicas. Não invente preços finais nem diagnósticos. Se o usuário pedir atendimento humano, diga que vai encaminhar para a equipe. Para agendamento, peça nome completo, melhor dia, melhor horário e motivo da consulta.\"\n      }\n    ]\n  },\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Mensagem do paciente: {{ $('Normalize Evolution Payload').first().json.text }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1328,
+        -96
+      ],
+      "id": "9b2b9533-6924-4e04-bcb5-d162c1ba648d",
+      "name": "Gemini - Generate Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// O n8n às vezes entrega a resposta do HTTP Request como objeto,\n// e às vezes como array com um objeto dentro.\nconst data = Array.isArray(item) ? item[0] : item;\n\nconst responseText =\n  data?.candidates?.[0]?.content?.parts\n    ?.map(part => part.text ?? '')\n    .join('\\n')\n    .trim();\n\nconst fallback =\n  'Olá! Sou o SorrisoBot AI da Clínica Sorriso Vivo. Recebi sua mensagem e vou te ajudar. Você deseja agendar uma consulta, tirar uma dúvida ou solicitar um orçamento?';\n\nreturn [\n  {\n    json: {\n      responseText: responseText || fallback,\n      generatedAt: new Date().toISOString(),\n      model: data?.modelVersion ?? 'gemini-2.5-flash',\n      responseId: data?.responseId ?? null,\n      usageMetadata: data?.usageMetadata ?? null\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -96
+      ],
+      "id": "b2931a1c-2723-4dba-ae6f-250b31b3e342",
+      "name": "Extract Gemini Response"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " {{URL NGROK}}                                                                                  ",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "77fa47c2-9d7c-4b1c-95b7-2cfe5869b272",
+      "name": "Evolution API",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nc2K9aR9R6sicYhr",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " {{URL NGROK}}/message/sendText/sorrisobot",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "{{ EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        720,
+        176
+      ],
+      "id": "25774c2b-28e6-4b00-9693-d92e1819a164",
+      "name": "Evolution API - Send WhatsApp Message"
+    },
+    {
+      "parameters": {
+        "jsCode": "const normalized = $('Normalize Evolution Payload').first().json;\nconst ai = $('Extract Gemini Response').first().json;\n\nreturn [\n  {\n    json: {\n      number: normalized.phoneRaw,\n      text: ai.responseText,\n      linkPreview: false\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        -96
+      ],
+      "id": "23ffc1d3-f9a5-4da0-ac02-123be82da553",
+      "name": "Prepare WhatsApp Message Body"
+    },
+    {
+      "parameters": {
+        "jsCode": "const conversation = $('Supabase - Get Or Create Conversation').first().json;\nconst contact = $('Supabase - Upsert Contact').first().json;\nconst ai = $('Extract Gemini Response').first().json;\nconst evolutionResponse = $('Evolution API - Send WhatsApp Message').first().json;\nconst normalized = $('Normalize Evolution Payload').first().json;\n\nreturn [\n  {\n    json: {\n      conversation_id: conversation.id,\n      contact_id: contact.id,\n      direction: 'outbound',\n      type: 'text',\n      intent: 'desconhecida',\n      sentiment: 'neutro',\n      provider: 'gemini_evolution_api',\n      provider_message_id:\n        evolutionResponse?.key?.id ??\n        evolutionResponse?.messageId ??\n        evolutionResponse?.id ??\n        null,\n      content: ai.responseText,\n      ai_model: 'gemini-2.5-flash',\n      raw_payload: evolutionResponse,\n      metadata: {\n        sent_by: 'n8n',\n        instance: normalized.instance,\n        remote_jid: normalized.remoteJid\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        176
+      ],
+      "id": "00db6c03-5618-4697-9b3c-b1a5f12a0eec",
+      "name": "Prepare Outbound Message Body"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}/rest/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ SUPABASE_API_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        176
+      ],
+      "id": "3606fcf4-b320-4aa6-8f18-8db8933a06d8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const conversation = $('Supabase - Get Or Create Conversation').first().json;\n\nreturn [\n  {\n    json: {\n      conversation_id: conversation.id,\n      event_type: 'agent_response_sent',\n      description: 'Resposta automática enviada pelo SorrisoBot AI via Evolution API.',\n      metadata: {\n        workflow: 'SorrisoBot AI - WhatsApp Agent v1',\n        model: 'gemini-2.5-flash',\n        source: 'n8n'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        176
+      ],
+      "id": "2277a567-77b5-49dc-a249-8ea72b23638a",
+      "name": "Prepare Conversation Event Body"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ SUPABASE_URL }}/rest/v1/conversation_events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ SUPABASE_API_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1552,
+        176
+      ],
+      "id": "4ca4bdf6-cae3-44c4-b7e7-9965f8c4587c",
+      "name": "Supabase - Save Conversation Event"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Evolution Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Evolution Payload": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Inbound Text Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Inbound Text Message?": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Upsert Contact": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Or Create Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Or Create Conversation": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Save Inbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Save Inbound Message": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Generate Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Generate Response": {
+      "main": [
+        [
+          {
+            "node": "Extract Gemini Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Gemini Response": {
+      "main": [
+        [
+          {
+            "node": "Prepare WhatsApp Message Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API - Send WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Outbound Message Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare WhatsApp Message Body": {
+      "main": [
+        [
+          {
+            "node": "Evolution API - Send WhatsApp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Outbound Message Body": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Event Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Conversation Event Body": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Save Conversation Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1ce4d607-b778-42e2-b861-711438f04b64",
+  "meta": {
+    "instanceId": "0da84756067633c71674ee397b723af08fce198f78dbdd0704eef0e880da3dc9"
+  },
+  "nodeGroups": [],
+  "id": "1DJXmTVjhNbHMcWl",
+  "tags": []
+}

@@ -49,6 +49,7 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 │   ├── database-schema.md
 │   ├── delivery-checklist.md
 │   ├── evolution-api-setup.md
+│   ├── n8n-workflow-setup.md
 │   ├── setup-tools.md
 │   ├── vibe-coding-journal.md
 │   └── video-script.md
@@ -67,6 +68,7 @@ O dashboard em Next.js consumirá a mesma base Supabase para exibir conversas, s
 - `docs/architecture.md`: visão geral da arquitetura, fluxos principais e decisões técnicas iniciais.
 - `docs/database-schema.md`: modelagem inicial do Supabase, tabelas, relações, RLS, realtime e views de métricas.
 - `docs/evolution-api-setup.md`: preparação da Evolution API v2 com Docker Compose, Postgres interno, Redis interno e scripts auxiliares.
+- `docs/n8n-workflow-setup.md`: documentação da Etapa 5, com workflow n8n validado ponta a ponta e problemas corrigidos.
 - `docs/setup-tools.md`: preparação das ferramentas, contas necessárias, variáveis sensíveis e decisões da etapa.
 - `docs/delivery-checklist.md`: checklist de entregáveis obrigatórios e diferenciais planejados.
 - `docs/vibe-coding-journal.md`: registro do uso de IA durante o desenvolvimento.

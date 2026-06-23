@@ -44,19 +44,19 @@ curl --fail --silent --show-error \
   --header "Content-Type: application/json" \
   --header "apikey: ${AUTHENTICATION_API_KEY}" \
   --data "{
-    \"webhook\": {
-      \"enabled\": ${WEBHOOK_ENABLED:-true},
-      \"url\": \"${N8N_WEBHOOK_URL}\",
-      \"byEvents\": true,
-      \"base64\": false,
-      \"events\": [
-        \"MESSAGES_UPSERT\",
-        \"CONNECTION_UPDATE\",
-        \"QRCODE_UPDATED\",
-        \"SEND_MESSAGE\"
-      ]
-    }
-  }"
+  \"webhook\": {
+    \"enabled\": true,
+    \"url\": \"${N8N_WEBHOOK_URL}\",
+    \"webhookByEvents\": true,
+    \"webhookBase64\": false,
+    \"events\": [
+      \"MESSAGES_UPSERT\",
+      \"CONNECTION_UPDATE\",
+      \"QRCODE_UPDATED\",
+      \"SEND_MESSAGE\"
+    ]
+  }
+}"
 
 echo
 echo "Webhook configurado. Valide no n8n Cloud se os eventos estao chegando corretamente."

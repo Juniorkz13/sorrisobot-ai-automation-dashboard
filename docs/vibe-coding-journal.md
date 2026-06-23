@@ -57,3 +57,23 @@ Este documento registra o uso de IA durante o desenvolvimento do SorrisoBot AI. 
 - Onde a IA falhou: ainda não avaliado
 - Correções manuais feitas: validar endpoints conforme versão da Evolution API usada
 - Decisão técnica tomada: usar Evolution API v2 com Docker Compose e instância controlada chamada sorrisobot
+
+## 2026-06-22 — Preparação da infraestrutura Evolution API
+
+- Ferramenta usada: Codex
+- Prompt utilizado: criação de infraestrutura Docker Compose e scripts para Evolution API
+- Resultado obtido: Evolution API executando localmente, instância `sorrisobot` criada, WhatsApp conectado e envio de mensagem validado
+- Onde a IA acertou: separou corretamente a Evolution API do Supabase e estruturou scripts auxiliares para healthcheck, criação de instância, conexão, webhook e envio de mensagem
+- Onde a IA falhou: o script inicial criou instância com `qrcode: false`; o payload inicial de envio usava `textMessage.text`, mas a imagem validada exigiu `text` na raiz; a variável `EVOLUTION_API_IMAGE` no `.env` sobrescreveu a imagem planejada no compose
+- Correções manuais feitas: ajuste para `qrcode: true`, correção de aspas no `.env`, troca/validação da imagem `evoapicloud/evolution-api:v2.3.7`, limpeza de volumes, regeneração de QR Code e correção do script `send-test-message.sh`
+- Decisão técnica tomada: usar Evolution API v2 com Docker Compose, Postgres e Redis próprios, mantendo Supabase separado como banco do produto
+
+## 2026-06-22 — Etapa 5: workflow n8n validado ponta a ponta
+
+- Ferramenta usada: Codex e n8n Cloud
+- Prompt utilizado: documentação da validação do workflow inicial do agente WhatsApp
+- Resultado obtido: workflow funcional ponta a ponta, passando por WhatsApp real, Evolution API, webhook n8n, Supabase, Gemini, envio de resposta e registro de evento
+- Onde a IA acertou: estrutura do fluxo
+- Onde a IA falhou: payloads e detalhes específicos da versão real
+- Correções manuais feitas: ajuste do wrapper `webhook` na Evolution API, correção de `.env` com espaço depois de `=`, correção do body JSON quebrado por quebras de linha do Gemini usando Code node e `JSON.stringify`, ajuste da API key correta para resolver 401 na Evolution API e registro da necessidade de rotacionar chaves sensíveis antes da entrega final
+- Decisão técnica tomada: primeiro validar fluxo simples antes de adicionar intents, memória avançada, RAG, áudio, imagem e Google Agenda
