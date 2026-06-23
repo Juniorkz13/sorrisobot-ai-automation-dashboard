@@ -71,7 +71,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}                                                             ",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}                                                           ",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -94,7 +94,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -141,11 +141,11 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             },
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -180,11 +180,11 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             },
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -219,11 +219,11 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             },
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -252,7 +252,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}                                                             ",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -271,7 +271,7 @@
       "typeVersion": 4.4,
       "position": [
         2032,
-        -96
+        -80
       ],
       "id": "9b2b9533-6924-4e04-bcb5-d162c1ba648d",
       "name": "Gemini - Generate Response",
@@ -336,7 +336,7 @@
             },
             {
               "name": "apikey",
-              "value": "Khanz131348122132!"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             }
           ]
         },
@@ -402,11 +402,11 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             },
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -507,11 +507,11 @@
           "parameters": [
             {
               "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "{{ API_KEY_PLACEHOLDER }}"
             },
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3am5lYmV1a3FjemtzanBsemh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjE1NDI4MSwiZXhwIjoyMDk3NzMwMjgxfQ.XzcvJemEt2wjMsgAe9AScnbspaRCGEs9oVkpIqLirIU"
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -551,7 +551,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.shouldHandoff }}",
+                    "leftValue": "={{ $json.ai_paused }}",
                     "rightValue": "",
                     "operator": {
                       "type": "boolean",
@@ -575,7 +575,7 @@
                 "conditions": [
                   {
                     "id": "38903205-99ed-42e8-a6f5-b06c0b68aecf",
-                    "leftValue": "={{ $json.shouldUseGemini }}",
+                    "leftValue": "={{ !$json.ai_paused }}",
                     "rightValue": "",
                     "operator": {
                       "type": "boolean",
@@ -599,6 +599,128 @@
       ],
       "id": "a31e41d3-9fd9-4fad-812e-6f832e7a2e52",
       "name": "Route by Intent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentItem = $input.first().json;\n\n// Busca a mensagem original no node de intent,\n// porque depois do Update Conversation State o telefone não vem mais no $json atual.\nconst intentItem = $('Detect Intent and Routing').first().json;\n\nconst message =\n  currentItem.staticReply ||\n  intentItem.staticReply ||\n  'Claro! Vou encaminhar sua conversa para um atendente da Clínica Sorriso Vivo. Por favor, aguarde um momento.';\n\nconst rawPhone =\n  intentItem.phone ||\n  intentItem.remoteJid ||\n  intentItem.from ||\n  intentItem.sender ||\n  intentItem.contact_phone ||\n  intentItem.raw_payload?.data?.key?.remoteJid ||\n  intentItem.raw_payload?.key?.remoteJid ||\n  '';\n\nconst number = String(rawPhone)\n  .replace('@s.whatsapp.net', '')\n  .replace(/\\D/g, '');\n\nif (!number) {\n  throw new Error('Não foi possível encontrar o telefone do paciente para enviar a mensagem de handoff.');\n}\n\nreturn [\n  {\n    json: {\n      ...currentItem,\n      originalInbound: intentItem,\n      conversation_id: currentItem.id || intentItem.conversation_id,\n      contact_id: currentItem.contact_id || intentItem.contact_id,\n      intent: currentItem.current_intent || intentItem.intent,\n      aiPausedReason: currentItem.ai_paused_reason || intentItem.aiPausedReason,\n      handoffMessage: message,\n      number,\n      text: message,\n      whatsappBody: {\n        number,\n        text: message\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        -240
+      ],
+      "id": "cc628f39-167a-4556-8e07-8fae90622e3c",
+      "name": "Prepare Handoff WhatsApp Message Body"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " https://uniparous-subconvex-toshia.ngrok-free.dev/message/sendText/sorrisobot",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "{{ API_KEY_PLACEHOLDER }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.number }}\",\n  \"text\": \"{{ $json.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2256,
+        -240
+      ],
+      "id": "9caa8d9a-886d-4aad-8a01-0e5403ecb1ed",
+      "name": "Evolution API - Send Handoff Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uwjnebeukqczksjplzhx.supabase.co/rest/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ API_KEY_PLACEHOLDER }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"conversation_id\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.conversation_id }}\",\n  \"contact_id\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.contact_id }}\",\n  \"direction\": \"outbound\",\n  \"type\": \"text\",\n  \"content\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.handoffMessage }}\",\n  \"provider\": \"evolution_api\",\n  \"intent\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.intent }}\",\n  \"sentiment\": \"neutro\",\n  \"raw_payload\": {\n    \"source\": \"handoff_static_reply\",\n    \"intent\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.intent }}\",\n    \"reason\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.aiPausedReason }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2480,
+        -240
+      ],
+      "id": "4dde63c5-ff63-42bd-93e1-16da4d3ca187",
+      "name": "Save Outbound Handoff Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uwjnebeukqczksjplzhx.supabase.co/rest/v1/conversation_events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ API_KEY_PLACEHOLDER }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ SUPABASE_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"conversation_id\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.conversation_id }}\",\n  \"event_type\": \"human_handoff_requested\",\n  \"description\": \"Conversa encaminhada para atendimento humano.\",\n  \"payload\": {\n    \"intent\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.intent }}\",\n    \"reason\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.aiPausedReason }}\",\n    \"message\": \"{{ $('Prepare Handoff WhatsApp Message Body').item.json.originalInbound.content }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2688,
+        -240
+      ],
+      "id": "309cdb1f-a28b-478b-8aae-db9126e0701a",
+      "name": "Save Handoff Event"
     }
   ],
   "pinData": {},
@@ -777,12 +899,51 @@
       "main": [
         [
           {
-            "node": "Gemini - Generate Response",
+            "node": "Prepare Handoff WhatsApp Message Body",
             "type": "main",
             "index": 0
           }
         ],
-        []
+        [
+          {
+            "node": "Gemini - Generate Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Handoff WhatsApp Message Body": {
+      "main": [
+        [
+          {
+            "node": "Evolution API - Send Handoff Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API - Send Handoff Message": {
+      "main": [
+        [
+          {
+            "node": "Save Outbound Handoff Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outbound Handoff Message": {
+      "main": [
+        [
+          {
+            "node": "Save Handoff Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -792,7 +953,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "acf36122-ca6d-4c40-9c4a-d580c296a4df",
+  "versionId": "379f08b1-5892-4916-b9c6-f1cb2244e082",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0da84756067633c71674ee397b723af08fce198f78dbdd0704eef0e880da3dc9"
