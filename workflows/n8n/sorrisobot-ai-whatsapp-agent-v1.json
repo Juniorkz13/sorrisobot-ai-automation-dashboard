@@ -397,7 +397,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1328,
+        1536,
         592
       ],
       "id": "2277a567-77b5-49dc-a249-8ea72b23638a",
@@ -436,7 +436,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1536,
+        1744,
         592
       ],
       "id": "4ca4bdf6-cae3-44c4-b7e7-9965f8c4587c",
@@ -444,7 +444,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\n\nconst rawText =\n  item.messageText ||\n  item.content ||\n  item.text ||\n  item.message ||\n  item.body ||\n  item.transcription ||\n  '';\n\nconst text = String(rawText)\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .trim();\n\nfunction hasAny(words) {\n  return words.some((word) => text.includes(word));\n}\n\nlet intent = 'unknown';\nlet confidence = 0.4;\nlet status = 'active';\nlet shouldUseGemini = true;\nlet shouldHandoff = false;\nlet aiPaused = false;\nlet staticReply = null;\nlet handoffReason = null;\n\nif (!text) {\n  intent = 'unknown';\n  confidence = 0.1;\n}\n\nelse if (\n  hasAny([\n    'atendente',\n    'humano',\n    'pessoa',\n    'recepcao',\n    'recepcionista',\n    'falar com alguem',\n    'quero falar com alguem',\n    'me chama no atendimento',\n    'suporte'\n  ])\n) {\n  intent = 'human_handoff';\n  confidence = 0.95;\n  status = 'waiting_human';\n  shouldUseGemini = false;\n  shouldHandoff = true;\n  aiPaused = true;\n  handoffReason = 'patient_requested_human';\n  staticReply = 'Claro! Vou encaminhar sua conversa para um atendente da Clínica Sorriso Vivo. Por favor, aguarde um momento.';\n}\n\nelse if (\n  hasAny([\n    'dor forte',\n    'muita dor',\n    'sangrando',\n    'sangramento',\n    'inchado',\n    'inchaço',\n    'trauma',\n    'bati o dente',\n    'quebrei o dente',\n    'dente quebrou',\n    'urgencia',\n    'urgente',\n    'emergencia',\n    'emergência'\n  ])\n) {\n  intent = 'emergency';\n  confidence = 0.95;\n  status = 'waiting_human';\n  shouldUseGemini = false;\n  shouldHandoff = true;\n  aiPaused = true;\n  handoffReason = 'possible_dental_emergency';\n  staticReply = 'Entendi. Como pode ser uma urgência odontológica, vou encaminhar sua conversa para um atendente da Clínica Sorriso Vivo. Se houver sangramento intenso, trauma grave ou dor insuportável, procure atendimento de urgência imediatamente.';\n}\n\nelse if (\n  hasAny([\n    'agendar',\n    'marcar',\n    'marca',\n    'consulta',\n    'gostaria de marcar',\n    'quero marcar',\n    'quero agendar',\n    'horario',\n    'horário',\n    'tem vaga',\n    'disponibilidade',\n    'posso marcar'\n  ])\n) {\n  intent = 'appointment_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'remarcar',\n    'mudar horario',\n    'mudar horário',\n    'trocar horario',\n    'trocar horário',\n    'alterar consulta'\n  ])\n) {\n  intent = 'reschedule_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'cancelar',\n    'desmarcar',\n    'cancelamento',\n    'nao vou conseguir ir',\n    'não vou conseguir ir'\n  ])\n) {\n  intent = 'cancel_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'preco',\n    'preço',\n    'valor',\n    'quanto custa',\n    'tabela',\n    'orcamento',\n    'orçamento',\n    'forma de pagamento',\n    'parcelam',\n    'parcela'\n  ])\n) {\n  intent = 'price_question';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'horario de atendimento',\n    'horário de atendimento',\n    'que horas abre',\n    'que horas fecha',\n    'funciona hoje',\n    'abre hoje',\n    'atende sabado',\n    'atende sábado'\n  ])\n) {\n  intent = 'clinic_hours';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'endereco',\n    'endereço',\n    'localizacao',\n    'localização',\n    'onde fica',\n    'como chegar',\n    'mapa'\n  ])\n) {\n  intent = 'location_question';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'clareamento',\n    'limpeza',\n    'canal',\n    'implante',\n    'aparelho',\n    'ortodontia',\n    'extracao',\n    'extração',\n    'restauracao',\n    'restauração',\n    'avaliacao',\n    'avaliação',\n    'procedimento'\n  ])\n) {\n  intent = 'procedure_question';\n  confidence = 0.8;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'oi',\n    'ola',\n    'olá',\n    'bom dia',\n    'boa tarde',\n    'boa noite'\n  ])\n) {\n  intent = 'greeting';\n  confidence = 0.75;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'obrigado',\n    'obrigada',\n    'valeu',\n    'agradeço',\n    'agradeco'\n  ])\n) {\n  intent = 'thanks';\n  confidence = 0.75;\n  status = 'active';\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      intent,\n      intentConfidence: confidence,\n      conversationStatus: status,\n      shouldUseGemini,\n      shouldHandoff,\n      aiPaused,\n      aiPausedReason: handoffReason,\n      staticReply,\n      detectedAt: new Date().toISOString()\n    }\n  }\n];"
+        "jsCode": "const item = $input.first().json;\n\nlet previousConversation = {};\n\ntry {\n  previousConversation = $('Supabase - Get Or Create Conversation').first().json || {};\n} catch (error) {\n  previousConversation = {};\n}\n\nconst previousStatus = previousConversation.status || null;\nconst previousIntent = previousConversation.current_intent || null;\nconst previousAiPaused = previousConversation.ai_paused || false;\n\nconst rawText =\n  item.messageText ||\n  item.content ||\n  item.text ||\n  item.message ||\n  item.body ||\n  item.transcription ||\n  '';\n\nconst text = String(rawText)\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .trim();\n\nfunction hasAny(words) {\n  return words.some((word) => text.includes(word));\n}\n\nlet intent = 'unknown';\nlet confidence = 0.4;\nlet status = 'active';\nlet shouldUseGemini = true;\nlet shouldHandoff = false;\nlet aiPaused = false;\nlet staticReply = null;\nlet handoffReason = null;\n\nif (!text) {\n  intent = 'unknown';\n  confidence = 0.1;\n}\n\nelse if (\n  hasAny([\n    'atendente',\n    'humano',\n    'pessoa',\n    'recepcao',\n    'recepcionista',\n    'falar com alguem',\n    'quero falar com alguem',\n    'me chama no atendimento',\n    'suporte'\n  ])\n) {\n  intent = 'human_handoff';\n  confidence = 0.95;\n  status = 'waiting_human';\n  shouldUseGemini = false;\n  shouldHandoff = true;\n  aiPaused = true;\n  handoffReason = 'patient_requested_human';\n  staticReply = 'Claro! Vou encaminhar sua conversa para um atendente da Clínica Sorriso Vivo. Por favor, aguarde um momento.';\n}\n\nelse if (\n  hasAny([\n    'dor forte',\n    'muita dor',\n    'sangrando',\n    'sangramento',\n    'inchado',\n    'inchaço',\n    'trauma',\n    'bati o dente',\n    'quebrei o dente',\n    'dente quebrou',\n    'urgencia',\n    'urgente',\n    'emergencia',\n    'emergência'\n  ])\n) {\n  intent = 'emergency';\n  confidence = 0.95;\n  status = 'waiting_human';\n  shouldUseGemini = false;\n  shouldHandoff = true;\n  aiPaused = true;\n  handoffReason = 'possible_dental_emergency';\n  staticReply = 'Entendi. Como pode ser uma urgência odontológica, vou encaminhar sua conversa para um atendente da Clínica Sorriso Vivo. Se houver sangramento intenso, trauma grave ou dor insuportável, procure atendimento de urgência imediatamente.';\n}\n\nelse if (\n  hasAny([\n    'agendar',\n    'marcar',\n    'marca',\n    'consulta',\n    'gostaria de marcar',\n    'quero marcar',\n    'quero agendar',\n    'horario',\n    'horário',\n    'tem vaga',\n    'disponibilidade',\n    'posso marcar'\n  ])\n) {\n  intent = 'appointment_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'remarcar',\n    'mudar horario',\n    'mudar horário',\n    'trocar horario',\n    'trocar horário',\n    'alterar consulta'\n  ])\n) {\n  intent = 'reschedule_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'cancelar',\n    'desmarcar',\n    'cancelamento',\n    'nao vou conseguir ir',\n    'não vou conseguir ir'\n  ])\n) {\n  intent = 'cancel_request';\n  confidence = 0.9;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'preco',\n    'preço',\n    'valor',\n    'quanto custa',\n    'tabela',\n    'orcamento',\n    'orçamento',\n    'forma de pagamento',\n    'parcelam',\n    'parcela'\n  ])\n) {\n  intent = 'price_question';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'horario de atendimento',\n    'horário de atendimento',\n    'que horas abre',\n    'que horas fecha',\n    'funciona hoje',\n    'abre hoje',\n    'atende sabado',\n    'atende sábado'\n  ])\n) {\n  intent = 'clinic_hours';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'endereco',\n    'endereço',\n    'localizacao',\n    'localização',\n    'onde fica',\n    'como chegar',\n    'mapa'\n  ])\n) {\n  intent = 'location_question';\n  confidence = 0.85;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'clareamento',\n    'limpeza',\n    'canal',\n    'implante',\n    'aparelho',\n    'ortodontia',\n    'extracao',\n    'extração',\n    'restauracao',\n    'restauração',\n    'avaliacao',\n    'avaliação',\n    'procedimento'\n  ])\n) {\n  intent = 'procedure_question';\n  confidence = 0.8;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'oi',\n    'ola',\n    'olá',\n    'bom dia',\n    'boa tarde',\n    'boa noite'\n  ])\n) {\n  intent = 'greeting';\n  confidence = 0.75;\n  status = 'active';\n}\n\nelse if (\n  hasAny([\n    'obrigado',\n    'obrigada',\n    'valeu',\n    'agradeço',\n    'agradeco'\n  ])\n) {\n  intent = 'thanks';\n  confidence = 0.75;\n  status = 'active';\n}\n\nif (\n  intent === 'unknown' &&\n  previousStatus === 'waiting_patient' &&\n  previousIntent &&\n  !previousAiPaused\n) {\n  intent = previousIntent;\n  confidence = 0.65;\n  status = 'active';\n  shouldUseGemini = true;\n  shouldHandoff = false;\n  aiPaused = false;\n  handoffReason = null;\n  staticReply = null;\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      intent,\n      intentConfidence: confidence,\n      conversationStatus: status,\n      shouldUseGemini,\n      shouldHandoff,\n      aiPaused,\n      aiPausedReason: handoffReason,\n      staticReply,\n      detectedAt: new Date().toISOString()\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -878,6 +878,10 @@
             {
               "fieldId": "last_outbound_at",
               "fieldValue": "={{ $json.updatedAt }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.nextConversationStatus }}"
             }
           ]
         }
@@ -885,7 +889,7 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1104,
+        1312,
         592
       ],
       "id": "cb8cee03-3a5e-4e03-9858-9d50a8465095",
@@ -896,6 +900,19 @@
           "name": "Supabase account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst conversation = $('Update Conversation State').first().json;\nconst responseData = $('Extract Gemini Response').first().json;\n\nconst intent =\n  conversation.current_intent ||\n  item.intent ||\n  'unknown';\n\nconst botResponse =\n  responseData.responseText ||\n  '';\n\nconst lowerResponse = botResponse.toLowerCase();\n\nconst appointmentLikeIntents = [\n  'appointment_request',\n  'reschedule_request',\n  'cancel_request',\n  'price_question',\n  'procedure_question'\n];\n\nconst botAskedForInfo =\n  lowerResponse.includes('?') ||\n  lowerResponse.includes('me informe') ||\n  lowerResponse.includes('informe') ||\n  lowerResponse.includes('qual é o seu nome') ||\n  lowerResponse.includes('nome completo') ||\n  lowerResponse.includes('horário') ||\n  lowerResponse.includes('horario') ||\n  lowerResponse.includes('melhor dia') ||\n  lowerResponse.includes('preferência');\n\nlet nextStatus = conversation.status || 'active';\n\nif (appointmentLikeIntents.includes(intent) && botAskedForInfo) {\n  nextStatus = 'waiting_patient';\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      conversation_id: item.conversation_id || conversation.id,\n      memory_summary: item.memory_summary,\n      updatedAt: item.updatedAt || new Date().toISOString(),\n      nextConversationStatus: nextStatus\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        592
+      ],
+      "id": "bbfb516d-79b9-4264-83a0-611a2d83d0f4",
+      "name": "Prepare Memory And Status Update"
     }
   ],
   "pinData": {},
@@ -1191,7 +1208,7 @@
       "main": [
         [
           {
-            "node": "Update Conversation Memory Summary",
+            "node": "Prepare Memory And Status Update",
             "type": "main",
             "index": 0
           }
@@ -1208,6 +1225,17 @@
           }
         ]
       ]
+    },
+    "Prepare Memory And Status Update": {
+      "main": [
+        [
+          {
+            "node": "Update Conversation Memory Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1216,7 +1244,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "090a0491-8c29-4823-a1ed-d943ddf06edf",
+  "versionId": "05f049e1-527e-4f65-ab29-b006c483e2ad",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0da84756067633c71674ee397b723af08fce198f78dbdd0704eef0e880da3dc9"
