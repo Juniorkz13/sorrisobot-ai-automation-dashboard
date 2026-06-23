@@ -397,8 +397,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1792,
-        368
+        1328,
+        592
       ],
       "id": "2277a567-77b5-49dc-a249-8ea72b23638a",
       "name": "Prepare Conversation Event Body"
@@ -436,8 +436,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2016,
-        368
+        1536,
+        592
       ],
       "id": "4ca4bdf6-cae3-44c4-b7e7-9965f8c4587c",
       "name": "Supabase - Save Conversation Event"
@@ -787,6 +787,115 @@
       ],
       "id": "1fb61c8a-f035-4f32-9c05-bcd5ea9ddd08",
       "name": "Prepare Gemini Request Body"
+    },
+    {
+      "parameters": {
+        "jsCode": "const conversation = $('Update Conversation State').first().json;\nconst intentData = $('Detect Intent and Routing').first().json;\nconst promptData = $('Build Gemini Prompt With Memory').first().json;\nconst responseData = $('Extract Gemini Response').first().json;\n\nconst previousSummary =\n  conversation.memory_summary ||\n  'Ainda não há resumo anterior da conversa.';\n\nconst currentUserMessage =\n  promptData.currentMessage ||\n  intentData.content ||\n  intentData.messageText ||\n  intentData.text ||\n  '';\n\nconst botResponse =\n  responseData.responseText ||\n  '';\n\nconst recentMessages = promptData.recentMessages || [];\n\nconst recentConversationText = recentMessages\n  .map(msg => {\n    const role = msg.direction === 'inbound' ? 'Paciente' : 'SorrisoBot';\n    return `${role}: ${msg.content || ''}`;\n  })\n  .join('\\n');\n\nconst memorySummaryPrompt = `\nVocê é responsável por atualizar a memória resumida de uma conversa entre um paciente e o SorrisoBot AI, assistente da Clínica Sorriso Vivo.\n\nResumo anterior:\n${previousSummary}\n\nHistórico recente:\n${recentConversationText || 'Sem histórico recente disponível.'}\n\nMensagem atual do paciente:\n${currentUserMessage}\n\nResposta enviada pelo bot:\n${botResponse}\n\nIntent atual:\n${conversation.current_intent || intentData.intent || 'unknown'}\n\nTarefa:\nAtualize o resumo da conversa em até 5 frases curtas.\n\nRegras:\n- Mantenha apenas informações úteis para continuar o atendimento.\n- Inclua intenção do paciente, procedimento desejado, data/horário mencionado, nome se informado e pendências.\n- Não invente dados.\n- Não mencione detalhes técnicos como n8n, Supabase, Evolution API ou Gemini.\n- Escreva em português do Brasil.\n- Retorne apenas o resumo final, sem título.\n`;\n\nreturn [\n  {\n    json: {\n      conversation_id: conversation.id,\n      contact_id: conversation.contact_id,\n      previousSummary,\n      currentUserMessage,\n      botResponse,\n      memorySummaryPrompt\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        368
+      ],
+      "id": "055ebdce-4e27-4b6b-8ec3-6947901a247f",
+      "name": "Build Memory Summary Prompt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nif (!item.memorySummaryPrompt) {\n  throw new Error('memorySummaryPrompt não encontrado.');\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      geminiMemoryRequestBody: {\n        contents: [\n          {\n            parts: [\n              {\n                text: item.memorySummaryPrompt\n              }\n            ]\n          }\n        ]\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        368
+      ],
+      "id": "ba6c0054-bc74-4c3f-a3dc-749a1cee87bc",
+      "name": "Prepare Memory Summary Request Body"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ GEMINI_API_KEY }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiMemoryRequestBody) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        704,
+        592
+      ],
+      "id": "75e0117b-7723-4af2-89c3-301f70756340",
+      "name": "Gemini - Generate Memory Summary",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst memorySummary =\n  item.candidates?.[0]?.content?.parts?.[0]?.text ||\n  item.body?.candidates?.[0]?.content?.parts?.[0]?.text ||\n  '';\n\nif (!memorySummary) {\n  throw new Error('Não foi possível extrair o resumo de memória do Gemini.');\n}\n\nconst cleanSummary = memorySummary.trim();\n\nreturn [\n  {\n    json: {\n      ...item,\n      conversation_id: $('Build Memory Summary Prompt').first().json.conversation_id,\n      contact_id: $('Build Memory Summary Prompt').first().json.contact_id,\n      memory_summary: cleanSummary,\n      updatedAt: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        592
+      ],
+      "id": "70b93c74-d4e1-475e-ae3b-d5eb3588dc92",
+      "name": "Extract Memory Summary"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "conversations",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.conversation_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "memory_summary",
+              "fieldValue": "={{ $json.memory_summary }}"
+            },
+            {
+              "fieldId": "last_outbound_at",
+              "fieldValue": "={{ $json.updatedAt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        592
+      ],
+      "id": "cb8cee03-3a5e-4e03-9858-9d50a8465095",
+      "name": "Update Conversation Memory Summary",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gUnVoLjy8kWCN6zE",
+          "name": "Supabase account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -954,7 +1063,7 @@
       "main": [
         [
           {
-            "node": "Prepare Conversation Event Body",
+            "node": "Build Memory Summary Prompt",
             "type": "main",
             "index": 0
           }
@@ -1044,6 +1153,61 @@
           }
         ]
       ]
+    },
+    "Build Memory Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Prepare Memory Summary Request Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Memory Summary Request Body": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Generate Memory Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Generate Memory Summary": {
+      "main": [
+        [
+          {
+            "node": "Extract Memory Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Memory Summary": {
+      "main": [
+        [
+          {
+            "node": "Update Conversation Memory Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Conversation Memory Summary": {
+      "main": [
+        [
+          {
+            "node": "Prepare Conversation Event Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1052,7 +1216,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "506abffa-fe97-467e-8c18-476953f64554",
+  "versionId": "090a0491-8c29-4823-a1ed-d943ddf06edf",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0da84756067633c71674ee397b723af08fce198f78dbdd0704eef0e880da3dc9"
